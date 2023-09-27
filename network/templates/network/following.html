@@ -1,0 +1,26 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+{% for data in post_data %}
+    <div class="container">
+        <div class="row justify-content-center mt-2">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-body" id="post-card">
+                        <p class="card-text">
+                            <h4 class="username"><a href="{% url 'profile' data.post.user %}" style="color: black;">{{ data.post.user }}</a></h4>
+                            <p>{{ data.post.content }}</p>
+                            <p>{{ data.post.timestamp }}</p>
+                            <p>Likes: {{ data.num_likes }}</p>
+                            <p>Comments: {{ data.num_comments }}</p>
+                            {% if user == data.post.user %}
+                            <a href="">Edit</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}
