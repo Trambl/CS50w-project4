@@ -11,7 +11,17 @@ class Post(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
     comments = models.ManyToManyField(User, related_name='commented_posts', blank=True)
-
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user": self.user.username,
+            "content": self.content,
+            "timestamp": self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+            "likes": self.likes.count(),
+            "comments": self.comments.count(),
+        }
+    
     def __str__(self):
         return f"Post by {self.user.username} at {self.timestamp}"
 
@@ -20,7 +30,16 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "post_id": self.post.id,
+            "user": self.user.username,
+            "content": self.content,
+            "timestamp": self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+    
     def __str__(self):
         return f"Comment by {self.user.username} on post by {self.post.user.username}"
 
@@ -34,3 +53,8 @@ class Like(models.Model):
             return f"Like by {self.user.username} on post by {self.post.user.username}"
         elif self.comment:
             return f"Like by {self.user.username} on comment by {self.comment.user.username}"
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
+    created_at = models.DateTimeField(auto_now_add=True)

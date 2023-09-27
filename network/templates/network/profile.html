@@ -1,0 +1,61 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header" style="text-align: center;"><h2>{{ user_profile }}</h2></div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <div class="row mt-3">
+                            <div class="col" style="text-align: center;">
+                                <h5>Followers: {{ num_followers }}</h5>
+                            </div>
+                            <div class="col" style="text-align: center;">
+                                <h5>Following: {{ num_followings }}</h5>
+                            </div>
+                        </div>
+                    </p>
+                    <div class="text-center">
+                        {% if user != user_profile %}
+                            {% if request.user.is_authenticated %}
+                                {% if not is_following %}
+                                <button class="btn btn-primary">Follow</button>
+                                {% else %}
+                                <button class="btn btn-primary">Unfollow</button>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <h1 style="text-align: center; padding: 0.5%;">User Posts</h1>
+</div>
+{% for data in post_data %}
+    <div class="container">
+        <div class="row justify-content-center mt-2">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-body" id="post-card">
+                        <p class="card-text">
+                            <h4 class="username"><a href="{% url 'profile' data.post.user %}" style="color: black;">{{ data.post.user }}</a></h4>
+                            <p>{{ data.post.content }}</p>
+                            <p>{{ data.post.timestamp }}</p>
+                            <p>Likes: {{ data.num_likes }}</p>
+                            <p>Comments: {{ data.num_comments }}</p>
+                            {% if user == data.post.user %}
+                            <a href="">Edit</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}

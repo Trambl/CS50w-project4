@@ -1,16 +1,81 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    <h2>All posts</h2>
-    <div class="card">
-        <div class="card-body">
-            <form>
-                <div class="form-group">
-                  <label for="newPostText"><h4>New post</h4></label>
-                  <textarea class="form-control" id="newPostText" rows="3" placeholder="Share what's on your mind: " autofocus></textarea>
+    <h2 style="text-align: center;">All posts</h2>
+    <div class="container">
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text">
+                            <form id="post-form">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                  <label for="newPostText"><h4>New post</h4></label>
+                                  <textarea class="form-control" id="newPostText" rows="3" placeholder="Share what's on your mind: " autofocus></textarea>
+                                </div>
+                                <button id="submit-button" type="submit" class="btn btn-primary mb-2">Post</button>
+                            </form>
+                        </p>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary mb-2">Post</button>
-            </form>
-        </div>  
+            </div>
+        </div>
     </div>
+    {% for data in post_data %}
+    <div class="container">
+        <div class="row justify-content-center mt-2">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-body" id="post-card">
+                        <p class="card-text">
+                            <h4 class="username"><a href="{% url 'profile' data.post.user %}" style="color: black;">{{ data.post.user }}</a></h4>
+                            <p>{{ data.post.content }}</p>
+                            <p>{{ data.post.timestamp }}</p>
+                            <p>Likes: {{ data.num_likes }}</p>
+                            <p>Comments: {{ data.num_comments }}</p>
+                            {% if user == data.post.user %}
+                            <a href="">Edit</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 {% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/index.js' %}"></script>
+{% endblock %}
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header" style="text-align: center;"><h2>{{ user_profile }}</h2></div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <div class="row mt-3">
+                            <div class="col" style="text-align: center;">
+                                <h5>Followers: {{ user_profile.follower }}</h5>
+                            </div>
+                            <div class="col" style="text-align: center;">
+                                <h5>Following: 50</h5>
+                            </div>
+                        </div>
+                    </p>
+                    <div class="text-center">
+                        {% if user != user_profile %}
+                        
+                        <button class="btn btn-primary">Follow</button>
+                        <button class="btn btn-primary">Unfollow</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
