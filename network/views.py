@@ -103,3 +103,17 @@ def profile(request, username):
             "is_following": is_following,
             "post_data": show_posts(user_profile),
         })
+    
+
+def following_users(request, username):
+    if request.method == "GET":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("login"))
+        
+        user = User.objects.get(username=username)
+        following_users = Follow.objects.filter(follower=user).values("following")
+        
+        return render(request, "network/following.html", {
+            "post_data": show_posts(following_users),
+        })
+       

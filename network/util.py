@@ -10,10 +10,14 @@ from .models import User, Post, Comment, Like, Follow
 
 
 def show_posts(user=None):
-    if user:
-        posts = Post.objects.filter(user=user)
+    if user is not None:
+        if hasattr(user, '__iter__'):
+            posts = Post.objects.filter(user__in=user).order_by('-timestamp')
+        else:
+            posts = Post.objects.filter(user=user).order_by('-timestamp')
     else:
         posts = Post.objects.all().order_by('-timestamp')
+
     post_data = []
     for post in posts:
         num_likes = post.likes.count()
