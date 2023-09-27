@@ -2,13 +2,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+import json
 from django.urls import reverse
+from django.http import JsonResponse
 
-from .models import User
+from .models import User, Post, Comment, Like, Follow
+from .util import show_posts
 
 
 def index(request):
-    return render(request, "network/index.html")
+    return render(request, "network/index.html", {
+        "post_data": show_posts(),
+        })
 
 
 def login_view(request):
@@ -61,3 +66,40 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def submit_post(request):
+    # TODO I'm trying to make an animation of new appearing post
+    if request.method == "POST":
+        # Parse the JSON data from the request body
+        data = json.loads(request.body)
+        
+        # Extract the 'body' field from the data
+        body = data.get('body', '')
+        
+        # Create a new Post instance and save it to the database
+        post = Post(user=request.user, content=body)
+        post.save()
+        
+        # Process the body data as needed
+        return JsonResponse({"post": post.serialize()})
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+def profile(request, username):
+    if request.method == "GET":
+        user_profile = User.objects.get(username=username)
+        num_followers = user_profile.follower.count()
+        num_followings = user_profile.following.count()
+        
+        if request.user.is_authenticated:
+            is_following = Follow.objects.filter(follower=request.user, following=user_profile).exists()
+        else:
+            is_following = True
+        
+        return render(request, "network/profile.html", {
+            "user_profile": user_profile,  
+            "num_followers": num_followers,
+            "num_followings": num_followings,  
+            "is_following": is_following,
+            "post_data": show_posts(user_profile),
+        })
