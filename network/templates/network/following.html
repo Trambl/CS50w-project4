@@ -1,7 +1,7 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-{% for data in post_data %}
+{% for data in page_obj %}
     <div class="container">
         <div class="row justify-content-center mt-2">
             <div class="col-md-10">
@@ -23,4 +23,26 @@
         </div>
     </div>
 {% endfor %}
+<div class="container">
+    <div class="row justify-content-center mt-2">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+            {% if not paginator.num_pages == 1 %}
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                
+                {% for page in paginator.page_range %}
+                    <li class="page-item {% if page == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
 {% endblock %}
