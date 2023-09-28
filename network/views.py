@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -11,8 +12,11 @@ from .util import show_posts
 
 
 def index(request):
+    
+    page_obj, paginator = show_posts(page_number=request.GET.get('page'))
     return render(request, "network/index.html", {
-        "post_data": show_posts(),
+        "page_obj": page_obj,
+        "paginator": paginator,
         })
 
 
@@ -95,13 +99,14 @@ def profile(request, username):
             is_following = Follow.objects.filter(follower=request.user, following=user_profile).exists()
         else:
             is_following = True
-        
+        page_obj, paginator = show_posts(user_profile, page_number=request.GET.get('page'))
         return render(request, "network/profile.html", {
             "user_profile": user_profile,  
             "num_followers": num_followers,
             "num_followings": num_followings,  
             "is_following": is_following,
-            "post_data": show_posts(user_profile),
+            "page_obj": page_obj,
+            "paginator": paginator,
         })
     
 
@@ -112,8 +117,9 @@ def following_users(request, username):
         
         user = User.objects.get(username=username)
         following_users = Follow.objects.filter(follower=user).values("following")
-        
+        page_obj, paginator = show_posts(following_users, page_number=request.GET.get('page'))
         return render(request, "network/following.html", {
-            "post_data": show_posts(following_users),
+            "page_obj": page_obj,
+            "paginator": paginator,
         })
        
