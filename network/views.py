@@ -12,7 +12,9 @@ from .util import show_posts
 
 
 def index(request):
-    page_obj, paginator = show_posts(page_number=request.GET.get("page"))
+    page_obj, paginator = show_posts(
+        request=request, page_number=request.GET.get("page")
+    )
     return render(
         request,
         "network/index.html",
@@ -83,6 +85,8 @@ def register(request):
 def submit_post(request):
     # TODO I'm trying to make an animation of new appearing post
     if request.method == "POST":
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
         # Parse the JSON data from the request body
         data = json.loads(request.body)
 
@@ -111,7 +115,9 @@ def profile(request, username):
         else:
             is_following = True
         page_obj, paginator = show_posts(
-            user_profile, page_number=request.GET.get("page")
+            request=request,
+            user=user_profile,
+            page_number=request.GET.get("page"),
         )
         return render(
             request,
@@ -137,7 +143,9 @@ def following_users(request, username):
             "following"
         )
         page_obj, paginator = show_posts(
-            following_users, page_number=request.GET.get("page")
+            request=request,
+            user=following_users,
+            page_number=request.GET.get("page"),
         )
         return render(
             request,
@@ -165,3 +173,36 @@ def edit_post(request):
                 "post_content": post.content,
             }
         )
+
+
+def like_post(request):
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+        data = json.loads(request.body)
+        post_id = data["postId"]
+        user = request.user
+        post = Post.objects.get(pk=post_id)
+        liked = Like.objects.filter(user=user, post=post).exists()
+        if liked:
+            like = Like.objects.get(user=user, post=post)
+            post.likes.remove(like)
+            like.delete()
+
+            return JsonResponse(
+                {
+                    "liked": False,
+                    "num_likes": post.likes.count(),
+                }
+            )
+        else:
+            like = Like(user=user, post=post)
+            like.save()
+            post.likes.add(like)
+
+            return JsonResponse(
+                {
+                    "liked": True,
+                    "num_likes": post.likes.count(),
+                }
+            )

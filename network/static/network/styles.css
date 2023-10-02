@@ -1,0 +1,22 @@
+.red-heart {
+    color: black;
+    transition: color 0.3s; 
+}
+.bi-heart:hover {
+    color: red;
+}
+
+.bi-heart-fill {
+    color: red;
+}
+
+.bi-heart-fill:hover {
+    color: black;
+    transition: color 0.3s; 
+}
+.icon-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
