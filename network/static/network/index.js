@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.save-button').forEach(button => {
         button.addEventListener('click', savePost);
     });
+    document.querySelectorAll('.red-heart').forEach(button => {
+        button.addEventListener('click', likePost);
+    })
 });
 
 function getCookie(name) {
@@ -32,7 +35,18 @@ function submitPost() {
             'X-CSRFToken': getCookie('csrftoken') // Include CSRF token
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.status === 401) {
+            // Unauthorized user, redirect to the login page
+            window.location.href = '/login'; // Update the URL to your login page
+        }
+        if (response.status === 200) {
+            return response.json();
+        } else {
+            // Handle other response statuses here if needed
+            console.error('Failed to submit post');
+        }
+    })
     .then(result => {
         console.log(result);
     });
@@ -85,4 +99,45 @@ function savePost(event) {
         document.querySelector(`#save-button-${postId}`).style.display = 'none';
         document.querySelector(`#edit-link-${postId}`).style.display = 'block';
     }); 
+}
+
+function likePost(event) {
+    const postId = event.currentTarget.getAttribute('data-post-id');
+    const data = {
+        postId: postId
+    }
+    fetch(`like_post`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (response.status === 401) {
+            // Unauthorized user, redirect to the login page
+            window.location.href = '/login'; // Update the URL to your login page
+        }
+        if (response.status === 200) {
+            return response.json();
+        } else {
+            // Handle other response statuses here if needed
+            console.error('Failed to like the post');
+        }
+    })
+    .then(result => {
+        console.log(result)
+        const icon = document.querySelector(`#like-icon-${postId}`);
+        
+        if (result.liked) {
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill');
+        }
+        else {
+            icon.classList.remove('bi-heart-fill');
+            icon.classList.add('bi-heart');
+        }
+        document.querySelector(`#num-likes-${postId}`).innerHTML = result.num_likes;
+    })
 }

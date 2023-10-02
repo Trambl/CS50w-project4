@@ -1,19 +1,33 @@
+{% load static %}
 {% for data in page_obj %}
     <div class="container">
         <div class="row justify-content-center mt-2">
             <div class="col-md-10">
                 <div class="card">
-                    <div class="card-body" id="post-card-{{ data.post.id }}">
+                    <div class="card-body" style="padding-bottom: 0%; padding-top: 0%;"id="post-card-{{ data.post.id }}">
                         <p class="card-text">
-                            <h4 class="username"><a href="{% url 'profile' data.post.user %}" style="color: black;">{{ data.post.user }}</a></h4>
+                            <div class="d-flex align-items-center">
+                                <h4 class="username"><a href="{% url 'profile' data.post.user %}" style="color: black;">{{ data.post.user }}</a></h4> 
+                                <p class="ml-auto" style="text-align: right;">{{ data.post.timestamp }}</p>           
+                            </div>
                             <p id="content-{{ data.post.id }}">{{ data.post.content | linebreaksbr }}</p>
                             {% if user == data.post.user %}
                                 <textarea class="form-control" id="edit-textarea-{{ data.post.id }}" style="display: none;">{{ data.post.content }}</textarea>
                                 <button data-post-id="{{ data.post.id }}" class="save-button btn btn-primary mb-2" id="save-button-{{ data.post.id }}" style="display: none; margin-top: 1.9%;">Save</button>
                             {% endif %}
-                            <p>{{ data.post.timestamp }}</p>
-                            <p>Likes: {{ data.num_likes }}</p>
-                            <p>Comments: {{ data.num_comments }}</p>
+                            <div class="d-flex align-items-center">
+                                <p>
+                                    <button class="icon-button">
+                                        {% if data.liked %}
+                                        <i class="bi bi-heart-fill red-heart" data-post-id="{{ data.post.id }}" id="like-icon-{{ data.post.id }}"></i>
+                                        {% else %}
+                                        <i class="bi bi-heart red-heart" data-post-id="{{ data.post.id }}" id="like-icon-{{ data.post.id }}"></i>
+                                        {% endif %}
+                                    </button>
+                                    <p style="padding-left: 0.5%;"id="num-likes-{{ data.post.id }}">{{ data.num_likes }}</p>
+                                </p>
+                            </div>
+                            <p class="ml-2" style="display: none;">Comments: {{ data.num_comments }}</p>
                             {% if user == data.post.user %}
                                 <a href="?edit-post-id{{ data.post.id }}" class="edit-link" data-post-id="{{ data.post.id }}" id="edit-link-{{ data.post.id }}">Edit</a>
                             {% endif %}
