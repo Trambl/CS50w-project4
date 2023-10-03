@@ -11,10 +11,10 @@
                     <p class="card-text">
                         <div class="row mt-3">
                             <div class="col" style="text-align: center;">
-                                <h5>Followers: {{ num_followers }}</h5>
+                                <h5 id="num-followers">Followers: {{ num_followers }}</h5>
                             </div>
                             <div class="col" style="text-align: center;">
-                                <h5>Following: {{ num_followings }}</h5>
+                                <h5 id="num-followings">Followings: {{ num_followings }}</h5>
                             </div>
                         </div>
                     </p>
@@ -22,9 +22,9 @@
                         {% if user != user_profile %}
                             {% if request.user.is_authenticated %}
                                 {% if not is_following %}
-                                <button class="btn btn-primary">Follow</button>
+                                <button class="btn btn-primary follow-button" data-following-id="{{ user_profile.id }}" data-following-username="{{ user_profile.username }}">Follow</button>
                                 {% else %}
-                                <button class="btn btn-primary">Unfollow</button>
+                                <button class="btn btn-primary follow-button" data-following-id="{{ user_profile.id }}" data-following-username="{{ user_profile.username }}">Unfollow</button>
                                 {% endif %}
                             {% endif %}
                         {% endif %}

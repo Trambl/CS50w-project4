@@ -31,6 +31,7 @@ class Post(models.Model):
         return f"Post by {self.user.username} at {self.timestamp}"
 
 
+# Model is created but not implemented in the program
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -68,9 +69,9 @@ class Like(models.Model):
 
 class Follow(models.Model):
     follower = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="follower"
+        User, on_delete=models.CASCADE, related_name="following"
     )
     following = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="following"
+        User, on_delete=models.CASCADE, related_name="follower"
     )
     created_at = models.DateTimeField(auto_now_add=True)

@@ -104,16 +104,14 @@ def submit_post(request):
 
 def profile(request, username):
     if request.method == "GET":
-        user_profile = User.objects.get(username=username)
-        num_followers = user_profile.follower.count()
-        num_followings = user_profile.following.count()
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("login"))
 
-        if request.user.is_authenticated:
-            is_following = Follow.objects.filter(
-                follower=request.user, following=user_profile
-            ).exists()
-        else:
-            is_following = True
+        user_profile = User.objects.get(username=username)
+        is_following = Follow.objects.filter(
+            follower=request.user, following=user_profile
+        ).exists()
+
         page_obj, paginator = show_posts(
             request=request,
             user=user_profile,
@@ -124,13 +122,40 @@ def profile(request, username):
             "network/profile.html",
             {
                 "user_profile": user_profile,
-                "num_followers": num_followers,
-                "num_followings": num_followings,
+                "num_followers": user_profile.follower.count(),
+                "num_followings": user_profile.following.count(),
                 "is_following": is_following,
                 "page_obj": page_obj,
                 "paginator": paginator,
             },
         )
+    if request.method == "POST":
+
+        follower = request.user
+        following = User.objects.get(username=username)
+        followed = Follow.objects.filter(
+            follower=follower, following=following
+        ).exists()
+        if followed:
+            follow = Follow.objects.get(follower=follower, following=following)
+            follow.delete()
+            return JsonResponse(
+                {
+                    "followed": False,
+                    "num_followers": following.follower.count(),
+                    "num_followings": following.following.count(),
+                }
+            )
+        else:
+            follow = Follow(follower=follower, following=following)
+            follow.save()
+            return JsonResponse(
+                {
+                    "followed": True,
+                    "num_followers": following.follower.count(),
+                    "num_followings": following.following.count(),
+                }
+            )
 
 
 def following_users(request, username):

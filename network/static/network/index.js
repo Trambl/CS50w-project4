@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelector('#post-form').addEventListener('submit', submitPost);
+    const postForm = document.querySelector('#post-form');
+    if (postForm) {
+        postForm.addEventListener('submit', submitPost);
+    }
+    
     document.querySelectorAll('.edit-link').forEach(link => {
         link.addEventListener('click', editPost);
     });
@@ -9,6 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.red-heart').forEach(button => {
         button.addEventListener('click', likePost);
     })
+    
+    const followButton = document.querySelector('.follow-button');
+    if (followButton) {
+        followButton.addEventListener('click', followUser);
+    }
 });
 
 function getCookie(name) {
@@ -106,7 +115,7 @@ function likePost(event) {
     const data = {
         postId: postId
     }
-    fetch(`like_post`, {
+    fetch(`/like_post`, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -139,5 +148,35 @@ function likePost(event) {
             icon.classList.add('bi-heart');
         }
         document.querySelector(`#num-likes-${postId}`).innerHTML = result.num_likes;
+    })
+}
+
+function followUser(event) {
+    const followingId = event.currentTarget.getAttribute('data-following-id')
+    const followingUsername = event.currentTarget.getAttribute('data-following-username')
+    const data = {
+        'followingId': followingId,
+    }
+    fetch(`/profile/${followingUsername}`, {
+        method: 'POST',
+        data: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        const followButton = document.querySelector('.follow-button');
+        if (result.followed) {
+            followButton.innerHTML = 'Unfollow';
+        }
+        else {
+            followButton.innerHTML = 'Follow';
+        }
+        const numFollowers = document.querySelector('#num-followers')
+        const numFollowings = document.querySelector('#num-followings')
+        numFollowers.innerHTML = `Followers: ${result.num_followers}`;
+        numFollowings.innerHTML = `Followings: ${result.num_followings}`;
     })
 }
